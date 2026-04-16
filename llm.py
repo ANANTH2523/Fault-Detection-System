@@ -32,9 +32,11 @@ def _build_langfuse_callback(session_id: str) -> Optional[Any]:
     if not os.getenv("LANGFUSE_PUBLIC_KEY") or not os.getenv("LANGFUSE_SECRET_KEY"):
         return None
 
+    langfuse_host = os.getenv("LANGFUSE_HOST", "https://challenges.reply.com/langfuse")
+
     try:
         # We keep args minimal for compatibility across Langfuse versions.
-        return CallbackHandler(session_id=session_id)  # type: ignore[arg-type]
+        return CallbackHandler(session_id=session_id, host=langfuse_host)  # type: ignore[arg-type]
     except Exception:
         try:
             return CallbackHandler()  # type: ignore[call-arg]
@@ -61,7 +63,7 @@ def llm_analysis(
         temperature_f = 0.0
     temperature_f = min(0.1, temperature_f)
 
-    api_key = os.getenv("OPENAI_API_KEY", "")
+    api_key = os.getenv("OPENROUTER_API_KEY", "") or os.getenv("OPENAI_API_KEY", "")
     model_name = model or os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
     system_prompt = (
@@ -107,6 +109,7 @@ def llm_analysis(
                 temperature=temperature_f,
                 max_tokens=5,
                 api_key=api_key,
+                base_url="https://openrouter.ai/api/v1",
             )
             messages = [SystemMessage(content=system_prompt), HumanMessage(content=user_prompt)]
 
