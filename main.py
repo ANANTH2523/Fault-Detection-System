@@ -56,6 +56,53 @@ def process_transaction(tx, memory, global_threat, sec_context, heuristic, risk,
         "risk": float(risk_val),
     }
 
+# ──────────────────────────────────────────────
+# Logging
+# ──────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s  %(levelname)-8s  %(message)s",
+    datefmt="%H:%M:%S",
+)
+log = logging.getLogger(__name__)
+
+# ──────────────────────────────────────────────
+# Load .env (check parent directory too)
+# ──────────────────────────────────────────────
+load_dotenv()  # cwd
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")  # parent (dataset dir)
+
+# ──────────────────────────────────────────────
+# Validate required env vars
+# ──────────────────────────────────────────────
+_REQUIRED_VARS = ["OPENROUTER_API_KEY", "LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY"]
+_missing = [v for v in _REQUIRED_VARS if not os.getenv(v)]
+if _missing:
+    log.error("Missing required environment variable(s): %s", ", ".join(_missing))
+    sys.exit(1)
+
+
+# ──────────────────────────────────────────────
+# Auto-discover dataset paths
+# ──────────────────────────────────────────────
+DATA_DIR = Path(__file__).resolve().parent.parent  # ../  (The Truman Show - train)
+
+def _find_dataset(name: str, extensions: tuple[str, ...] = (".csv", ".json")) -> str:
+    """Search DATA_DIR for a file matching *name* with any of the given extensions."""
+    for ext in extensions:
+        candidate = DATA_DIR / f"{name}{ext}"
+        if candidate.exists():
+            return str(candidate)
+    return ""
+
+
+def generate_session_id() -> str:
+    """Create a unique session ID: {TEAM_NAME}-{ULID}."""
+    team = os.getenv("TEAM_NAME", "team").replace(" ", "-")
+    session_id = f"{team}-{ulid.new().str}"
+    log.info("Generated session ID: %s", session_id)
+    return session_id
+
 
 def economic_priority(record):
     return (
@@ -64,6 +111,8 @@ def economic_priority(record):
         record["anomaly"],
         record["amount"],
     )
+
+    log.info("Pipeline complete | session: %s", session_id)
 
 
 def calibrate_fraud_records(records, min_ratio=0.08, max_ratio=0.15):
