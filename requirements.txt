@@ -1,14 +1,4 @@
-pandas>=2.0.0
-numpy>=1.24.0
-python-dateutil>=2.8.2
-
-# LLM (optional at runtime)
-openai>=1.40.0
-
-# Langfuse (required for instrumentation; code degrades gracefully if env vars are missing)
-langfuse>=2.0.0
-
-# Selective LLM escalation (LangChain wrapper + Langfuse CallbackHandler)
-langchain-core
-langchain-openai
-
+pandas
+requests
+python-dotenv
+langfuse

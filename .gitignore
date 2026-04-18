@@ -1,0 +1,28 @@
+# Environment Variables and Secrets
+.env
+config.json
+secret.json
+keys.txt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Mac / OS OS files
+.DS_Store
+__MACOSX/
+
+# Data and Artifacts generated locally
+data/
+output/
+clean_submission/
+output_*.txt
+*.zip
+*.csv
+*.json
